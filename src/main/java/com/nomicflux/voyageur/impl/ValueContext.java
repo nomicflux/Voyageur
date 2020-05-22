@@ -4,19 +4,19 @@ import com.nomicflux.voyageur.Context;
 import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Node;
 
-public final class ValueContext<A, N extends Node<A>, E extends Edge<A>> implements Context<A, N, E> {
+public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>> implements Context<A, N, E, I> {
     private final N node;
-    private final Iterable<E> outboundEdges;
-    private final Iterable<E> inboundEdges;
+    private final I outboundEdges;
+    private final I inboundEdges;
 
-    private ValueContext(N node, Iterable<E> outboundEdges, Iterable<E> inboundEdges) {
+    private ValueContext(N node, I outboundEdges, I inboundEdges) {
         this.node = node;
         this.outboundEdges = outboundEdges;
         this.inboundEdges = inboundEdges;
     }
 
-    public static <A, N extends Node<A>, E extends Edge<A>> Context<A, N, E> valueContext(N node, Iterable<E> outboundEdges, Iterable<E> inboundEdges) {
-        return new ValueContext<A, N, E>(node, outboundEdges, inboundEdges);
+    public static <A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>> Context<A, N, E, I> context(N node, I outboundEdges, I inboundEdges) {
+        return new ValueContext<A, N, E, I>(node, outboundEdges, inboundEdges);
     }
 
     @Override
@@ -25,12 +25,12 @@ public final class ValueContext<A, N extends Node<A>, E extends Edge<A>> impleme
     }
 
     @Override
-    public Iterable<E> getOutboundEdges() {
+    public I getOutboundEdges() {
         return outboundEdges;
     }
 
     @Override
-    public Iterable<E> getInboundEdges() {
+    public I getInboundEdges() {
         return inboundEdges;
     }
 }

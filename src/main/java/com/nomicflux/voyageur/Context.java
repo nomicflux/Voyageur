@@ -1,9 +1,9 @@
 package com.nomicflux.voyageur;
 
-public interface Context<A, N extends Node<A>, E extends Edge<A>> {
+public interface Context<A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>> {
     N getNode();
 
-    Iterable<E> getOutboundEdges();
+    I getOutboundEdges();
 
-    Iterable<E> getInboundEdges();
+    I getInboundEdges();
 }

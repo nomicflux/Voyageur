@@ -1,7 +1,7 @@
 package com.nomicflux.voyageur;
 
-public interface Edge<A> {
-    Node<A> getNodeFrom();
+public interface Edge<A, N extends Node<A>> {
+    N getNodeFrom();
 
-    Node<A> getNodeTo();
+    N getNodeTo();
 }

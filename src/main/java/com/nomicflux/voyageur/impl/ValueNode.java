@@ -3,19 +3,21 @@ package com.nomicflux.voyageur.impl;
 import com.jnape.palatable.lambda.functions.Fn1;
 import com.nomicflux.voyageur.Node;
 
-public final class ValueNode<A extends Comparable<A>> implements Node<A>, Comparable<Node<A>> {
+import java.util.Objects;
+
+public final class ValueNode<A> implements Node<A> {
     private final A value;
 
     private ValueNode(A value) {
         this.value = value;
     }
 
-    public static <A extends Comparable<A>> Node<A> valueNode(A a) {
+    public static <A> Node<A> node(A a) {
         return new ValueNode<A>(a);
     }
 
-    public static <A extends Comparable<A>> Fn1<A, Node<A>> valueNode() {
-        return ValueNode::valueNode;
+    public static <A> Fn1<A, Node<A>> node() {
+        return ValueNode::node;
     }
 
     public A getValue() {
@@ -23,7 +25,15 @@ public final class ValueNode<A extends Comparable<A>> implements Node<A>, Compar
     }
 
     @Override
-    public int compareTo(Node<A> o) {
-        return getValue().compareTo(o.getValue());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ValueNode<?> valueNode = (ValueNode<?>) o;
+        return Objects.equals(value, valueNode.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

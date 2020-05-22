@@ -1,5 +1,5 @@
 package com.nomicflux.voyageur;
 
-public interface WeightedEdge<A, W> extends Edge<A> {
+public interface WeightedEdge<A, N extends Node<A>, W> extends Edge<A, N> {
     W getWeight();
 }
