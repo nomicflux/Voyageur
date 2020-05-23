@@ -4,7 +4,7 @@ import com.nomicflux.voyageur.Context;
 import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Node;
 
-public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>> implements Context<A, N, E, I> {
+public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>> implements Context<A, N, E, I> {
     private final N node;
     private final I outboundEdges;
     private final I inboundEdges;
@@ -15,7 +15,7 @@ public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N>, I ex
         this.inboundEdges = inboundEdges;
     }
 
-    public static <A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>> Context<A, N, E, I> context(N node, I outboundEdges, I inboundEdges) {
+    public static <A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>> Context<A, N, E, I> context(N node, I outboundEdges, I inboundEdges) {
         return new ValueContext<A, N, E, I>(node, outboundEdges, inboundEdges);
     }
 

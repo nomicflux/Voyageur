@@ -8,7 +8,7 @@ import com.nomicflux.voyageur.WeightedEdge;
 
 import java.util.Objects;
 
-public final class ValueWeightedEdge<A, N extends Node<A>, W> implements WeightedEdge<A, N, W> {
+public final class ValueWeightedEdge<A, N extends Node<A>, W> implements WeightedEdge<A, N, W, ValueWeightedEdge<A, N, W>> {
     private final N nodeFrom;
     private final N nodeTo;
     private final W weight;
@@ -19,35 +19,35 @@ public final class ValueWeightedEdge<A, N extends Node<A>, W> implements Weighte
         this.weight = weight;
     }
 
-    public static <A, N extends Node<A>, W> WeightedEdge<A, N, W> weightedEdgeFromTo(N nodeFrom, N nodeTo, W weight) {
+    public static <A, N extends Node<A>, W> ValueWeightedEdge<A, N, W> weightedEdgeFromTo(N nodeFrom, N nodeTo, W weight) {
         return new ValueWeightedEdge<>(nodeFrom, nodeTo, weight);
     }
 
-    public static <A, N extends Node<A>, W> Fn1<W, WeightedEdge<A, N, W>> weightedEdgeFromTo(N nodeFrom, N nodeTo) {
+    public static <A, N extends Node<A>, W> Fn1<W, ValueWeightedEdge<A, N, W>> weightedEdgeFromTo(N nodeFrom, N nodeTo) {
         return weight -> new ValueWeightedEdge<>(nodeFrom, nodeTo, weight);
     }
 
-    public static <A, N extends Node<A>, W> Fn3<N, N, W, WeightedEdge<A, N, W>> weightedEdgeFromTo() {
+    public static <A, N extends Node<A>, W> Fn3<N, N, W, ValueWeightedEdge<A, N, W>> weightedEdgeFromTo() {
         return ValueWeightedEdge::weightedEdgeFromTo;
     }
 
-    public static <A, N extends Node<A>, W> WeightedEdge<A, N, W> weightedEdgeToFrom(N nodeTo, N nodeFrom, W weight) {
+    public static <A, N extends Node<A>, W> ValueWeightedEdge<A, N, W> weightedEdgeToFrom(N nodeTo, N nodeFrom, W weight) {
         return new ValueWeightedEdge<>(nodeFrom, nodeTo, weight);
     }
 
-    public static <A, N extends Node<A>, W> Fn1<W, WeightedEdge<A, N, W>> weightedEdgeToFrom(N nodeTo, N nodeFrom) {
+    public static <A, N extends Node<A>, W> Fn1<W, ValueWeightedEdge<A, N, W>> weightedEdgeToFrom(N nodeTo, N nodeFrom) {
         return weight -> new ValueWeightedEdge<>(nodeFrom, nodeTo, weight);
     }
 
-    public static <A, N extends Node<A>, W> Fn3<N, N, W, WeightedEdge<A, N, W>> weightedEdgeToFrom() {
+    public static <A, N extends Node<A>, W> Fn3<N, N, W, ValueWeightedEdge<A, N, W>> weightedEdgeToFrom() {
         return ValueWeightedEdge::weightedEdgeToFrom;
     }
 
-    public static <A, N extends Node<A>, W> Fn2<N, W, WeightedEdge<A, N, W>> weightedEdgeTo(N to) {
+    public static <A, N extends Node<A>, W> Fn2<N, W, ValueWeightedEdge<A, N, W>> weightedEdgeTo(N to) {
         return (from, weight) -> weightedEdgeToFrom(to, from, weight);
     }
 
-    public static <A, N extends Node<A>, W> Fn2<N, W, WeightedEdge<A, N, W>> weightedEdgeFrom(N from) {
+    public static <A, N extends Node<A>, W> Fn2<N, W, ValueWeightedEdge<A, N, W>> weightedEdgeFrom(N from) {
         return (to, weight) -> weightedEdgeToFrom(to, from, weight);
     }
 
@@ -64,6 +64,11 @@ public final class ValueWeightedEdge<A, N extends Node<A>, W> implements Weighte
     @Override
     public N getNodeTo() {
         return nodeTo;
+    }
+
+    @Override
+    public ValueWeightedEdge<A, N, W> swap() {
+        return weightedEdgeFromTo(nodeTo, nodeFrom, weight);
     }
 
     @Override

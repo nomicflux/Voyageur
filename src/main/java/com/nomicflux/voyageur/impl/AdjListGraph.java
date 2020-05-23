@@ -18,7 +18,7 @@ import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.nomicflux.voyageur.impl.ValueContext.context;
 
-public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N>> implements Graph<A, N, E, HashSet<E>, AdjListGraph<A, N, E>> {
+public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> implements Graph<A, N, E, HashSet<E>, AdjListGraph<A, N, E>> {
     private final HashMap<N, Tuple2<HashSet<E>, HashSet<E>>> graph;
 
     private AdjListGraph(HashMap<N, Tuple2<HashSet<E>, HashSet<E>>> graph) {
@@ -29,15 +29,15 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N>> impl
         return graph.isEmpty();
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N>> AdjListGraph<A, N, E> emptyGraph() {
+    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> emptyGraph() {
         return new AdjListGraph<A, N, E>(HashMap.<N, Tuple2<HashSet<E>, HashSet<E>>>hashMap());
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N>> AdjListGraph<A, N, E> singletonGraph(N a) {
+    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> singletonGraph(N a) {
         return new AdjListGraph<A, N, E>(hashMap(tuple(a, tuple(HashSet.<E>hashSet(), HashSet.<E>hashSet()))));
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N>> AdjListGraph<A, N, E> fromEdge(E edge) {
+    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> fromEdge(E edge) {
         return AdjListGraph.<A, N, E>emptyGraph().addEdge(edge);
     }
 
@@ -85,14 +85,7 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N>> impl
 
     @Override
     public AdjListGraph<A, N, E> removeNode(N node) {
-        return new AdjListGraph<>(foldLeft((m, k) -> m
-                        .get(k)
-                        .match(constantly(m),
-                                v -> m.put(k,
-                                        tuple(foldLeft((s1, e1) -> e1.getNodeFrom() == node ? s1 : s1.add(e1), hashSet(), v._1()),
-                                                foldLeft((s, e) -> e.getNodeTo() == node ? s : s.add(e), hashSet(), v._1())))),
-                graph.remove(node),
-                graph.remove(node).keys()));
+        return new AdjListGraph<>(graph.remove(node));
     }
 
     @Override
@@ -106,8 +99,9 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N>> impl
         return view.match(constantly(Choice2.a(this)),
                 res -> {
                     Fn2<AdjListGraph<A, N, E>, E, AdjListGraph<A, N, E>> removeEdge = AdjListGraph::removeEdge;
-                    return Choice2.b(tuple(context(node, res._1(), res._2()),
-                            foldLeft(removeEdge, this, res._1().union(res._2()))
+                    Context<A, N, E, HashSet<E>> context = context(node, res._1(), res._2());
+                    return Choice2.b(tuple(context,
+                            foldLeft((g, e) -> g.removeEdge(e).removeEdge(e.swap()), this, res._1().union(res._2()))
                                     .removeNode(node)));
                 });
     }

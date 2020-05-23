@@ -7,7 +7,7 @@ import com.nomicflux.voyageur.Node;
 
 import java.util.Objects;
 
-public final class ValueEdge<A, N extends Node<A>> implements Edge<A, N> {
+public final class ValueEdge<A, N extends Node<A>> implements Edge<A, N, ValueEdge<A, N>> {
     private final N nodeFrom;
     private final N nodeTo;
 
@@ -16,34 +16,39 @@ public final class ValueEdge<A, N extends Node<A>> implements Edge<A, N> {
         this.nodeFrom = nodeFrom;
     }
 
-    public static <A, N extends Node<A>> Edge<A, N> edgeFromTo(N from, N to) {
+    public static <A, N extends Node<A>> ValueEdge<A, N> edgeFromTo(N from, N to) {
         return new ValueEdge<>(from, to);
     }
 
-    public static <A, N extends Node<A>> Fn2<N, N, Edge<A, N>> edgeFromTo() {
+    public static <A, N extends Node<A>> Fn2<N, N, ValueEdge<A, N>> edgeFromTo() {
         return ValueEdge::edgeFromTo;
     }
 
-    public static <A, N extends Node<A>> Edge<A, N> edgeToFrom(N to, N from) {
+    public static <A, N extends Node<A>> ValueEdge<A, N> edgeToFrom(N to, N from) {
         return new ValueEdge<>(from, to);
     }
 
-    public static <A, N extends Node<A>> Fn2<N, N, Edge<A, N>> edgeToFrom() {
+    public static <A, N extends Node<A>> Fn2<N, N, ValueEdge<A, N>> edgeToFrom() {
         return ValueEdge::edgeToFrom;
     }
 
 
-    public static <A, N extends Node<A>> Fn1<N, Edge<A, N>> edgeTo(N to) {
+    public static <A, N extends Node<A>> Fn1<N, ValueEdge<A, N>> edgeTo(N to) {
         return from -> new ValueEdge<A, N>(from, to);
     }
 
-    public static <A, N extends Node<A>> Fn1<N, Edge<A, N>> edgeFrom(N from) {
+    public static <A, N extends Node<A>> Fn1<N, ValueEdge<A, N>> edgeFrom(N from) {
         return to -> new ValueEdge<A, N>(from, to);
     }
 
     @Override
     public N getNodeTo() {
         return nodeTo;
+    }
+
+    @Override
+    public ValueEdge<A, N> swap() {
+        return edgeFromTo(nodeTo, nodeFrom);
     }
 
     @Override

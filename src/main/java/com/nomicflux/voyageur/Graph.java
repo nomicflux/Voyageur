@@ -5,7 +5,7 @@ import com.jnape.palatable.lambda.adt.choice.Choice2;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.Fn1;
 
-public interface Graph<A, N extends Node<A>, E extends Edge<A, N>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> {
+public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> {
     Boolean isEmpty();
 
     G addEdge(E edge);
