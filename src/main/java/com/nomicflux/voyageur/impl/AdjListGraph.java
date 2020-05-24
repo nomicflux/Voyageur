@@ -29,16 +29,21 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> i
         return graph.isEmpty();
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> emptyGraph() {
+    public static <A, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> emptyGraph() {
         return new AdjListGraph<A, N, E>(HashMap.<N, Tuple2<HashSet<E>, HashSet<E>>>hashMap());
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> singletonGraph(N a) {
+    public static <A, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> singletonGraph(N a) {
         return new AdjListGraph<A, N, E>(hashMap(tuple(a, tuple(HashSet.<E>hashSet(), HashSet.<E>hashSet()))));
     }
 
-    public static <A extends Comparable, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> fromEdge(E edge) {
+    public static <A, N extends Node<A>, E extends Edge<A, N, E>> AdjListGraph<A, N, E> fromEdge(E edge) {
         return AdjListGraph.<A, N, E>emptyGraph().addEdge(edge);
+    }
+
+    public static <A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>> AdjListGraph<A, N, E> fromEdges(I edges) {
+        AdjListGraph<A, N, E> empty = AdjListGraph.<A, N, E>emptyGraph();
+        return foldLeft(AdjListGraph::addEdge, empty, edges);
     }
 
     @Override
@@ -85,7 +90,9 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> i
 
     @Override
     public AdjListGraph<A, N, E> removeNode(N node) {
-        return new AdjListGraph<>(graph.remove(node));
+        AdjListGraph<A, N, E> match = graph.get(node).match(constantly(this),
+                res -> foldLeft((g, e) -> g.removeEdge(e).removeEdge(e.swap()), this, res._1().union(res._2())));
+        return new AdjListGraph<>(match.graph.remove(node));
     }
 
     @Override
@@ -100,9 +107,7 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> i
                 res -> {
                     Fn2<AdjListGraph<A, N, E>, E, AdjListGraph<A, N, E>> removeEdge = AdjListGraph::removeEdge;
                     Context<A, N, E, HashSet<E>> context = context(node, res._1(), res._2());
-                    return Choice2.b(tuple(context,
-                            foldLeft((g, e) -> g.removeEdge(e).removeEdge(e.swap()), this, res._1().union(res._2()))
-                                    .removeNode(node)));
+                    return Choice2.b(tuple(context, this.removeNode(node)));
                 });
     }
 }

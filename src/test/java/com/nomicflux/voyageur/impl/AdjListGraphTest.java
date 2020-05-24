@@ -13,6 +13,7 @@ import static com.nomicflux.voyageur.impl.AdjListGraph.*;
 import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueLabeledNode.labeledNode;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -94,5 +95,23 @@ public class AdjListGraphTest {
         assertThat(decomposed._1().getInboundEdges(), equalTo(hashSet(edge)));
         assertThat(decomposed._1().getOutboundEdges(), equalTo(hashSet()));
         assertFalse(decomposed._2().isEmpty());
+    }
+
+    @Test
+    public void removesNodeFromAllRelevantEdges() {
+        ValueEdge<Integer, Node<Integer>> edge12 = edgeFromTo(node(1), node(2));
+        ValueEdge<Integer, Node<Integer>> edge21 = edgeFromTo(node(2), node(1));
+        ValueEdge<Integer, Node<Integer>> edge13 = edgeFromTo(node(1), node(3));
+        ValueEdge<Integer, Node<Integer>> edge23 = edgeFromTo(node(2), node(3));
+        AdjListGraph<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>> graph = fromEdges(asList(edge12, edge21, edge13, edge23));
+        AdjListGraph<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>> withoutOne = graph.removeNode(edge12.getNodeFrom());
+        assertThat(withoutOne.atNode(edge12.getNodeFrom()).projectB(), equalTo(nothing()));
+        Context<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>, HashSet<ValueEdge<Integer, Node<Integer>>>> c2 = withoutOne.atNode(edge23.getNodeFrom()).projectB().orElseThrow(AssertionError::new)._1();
+        Context<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>, HashSet<ValueEdge<Integer, Node<Integer>>>> c3 = withoutOne.atNode(edge23.getNodeTo()).projectB().orElseThrow(AssertionError::new)._1();
+        assertFalse(c2.getInboundEdges().contains(edge12));
+        assertFalse(c2.getOutboundEdges().contains(edge21));
+        assertFalse(c3.getInboundEdges().contains(edge13));
+        assertTrue(c2.getOutboundEdges().contains(edge23));
+        assertTrue(c3.getInboundEdges().contains(edge23));
     }
 }
