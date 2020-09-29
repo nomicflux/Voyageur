@@ -34,9 +34,9 @@ public class FoldG<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iter
                         .match(constantly(g.decompose()),
                                 Maybe::just)
                         .match(constantly(terminate(acc)),
-                                x -> destinationCheck.apply(x._1())
-                                        ? terminate(accumulator.apply(acc, x._1()))
-                                        : recurse(tuple(x._2(), whereTo.apply(state, x._1()), accumulator.apply(acc, x._1()))))),
+                                c -> destinationCheck.apply(c._1())
+                                        ? terminate(accumulator.apply(acc, c._1()))
+                                        : recurse(tuple(c._2(), whereTo.apply(state, c._1()), accumulator.apply(acc, c._1()))))),
                 tuple(graph, defState, defAcc));
     }
 
@@ -65,13 +65,11 @@ public class FoldG<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iter
 
     @SuppressWarnings("unchecked")
     public static <A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>, S, Acc>
-    Acc guidedFold(Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
-                   Fn1<S, Maybe<N>> contextGetter,
-                   Fn2<S, Context<A, N, E, I>, S> whereTo,
+    Acc guidedFold(Fn1<S, Maybe<N>> contextGetter, Fn2<S, Context<A, N, E, I>, S> whereTo, Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
                    Acc defAcc,
                    S defState,
                    G graph) {
-        return ((FoldG<A, N, E, I, G, S, Acc>) INSTANCE).checkedApply(constantly(true), contextGetter, whereTo, accumulator, defAcc, defState, graph);
+        return ((FoldG<A, N, E, I, G, S, Acc>) INSTANCE).checkedApply(constantly(false), contextGetter, whereTo, accumulator, defAcc, defState, graph);
     }
 
     @SuppressWarnings("unchecked")
@@ -88,6 +86,6 @@ public class FoldG<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iter
     Acc simpleFold(Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
                    Acc defAcc,
                    G graph) {
-        return ((FoldG<A, N, E, I, G, Unit, Acc>) INSTANCE).checkedApply(constantly(true), constantly(nothing()), fn2((__, ___) -> UNIT), accumulator, defAcc, UNIT, graph);
+        return ((FoldG<A, N, E, I, G, Unit, Acc>) INSTANCE).checkedApply(constantly(false), constantly(nothing()), fn2((__, ___) -> UNIT), accumulator, defAcc, UNIT, graph);
     }
 }
