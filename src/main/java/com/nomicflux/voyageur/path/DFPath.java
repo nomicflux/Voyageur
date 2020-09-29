@@ -22,6 +22,7 @@ import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.ter
 import static com.jnape.palatable.lambda.functions.recursion.Trampoline.trampoline;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
+import static com.nomicflux.voyageur.fold.FoldG.foldG;
 
 public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> implements Fn3<G, N, A, StrictQueue<N>> {
     private static DFPath<?, ?, ?, ?, ?> INSTANCE = new DFPath<>();
@@ -31,15 +32,14 @@ public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I exten
 
     @Override
     public StrictQueue<N> checkedApply(G startGraph, N startNode, A a) {
-        return trampoline(into3((g, n, v) -> n.head().flatMap(x -> g.atNode(x).projectB().fmap(into((c, g2) -> {
-                    RecursiveResult<Tuple3<G, StrictStack<N>, StrictQueue<N>>, StrictQueue<N>> res =
-                            c.getNode().getValue().equals(a)
-                                    ? terminate(v.snoc(c.getNode()))
-                                    : recurse(tuple(g2, foldLeft((n2, e2) -> n2.cons(e2.getNodeTo()), n.tail(), c.getOutboundEdges()), v.snoc(c.getNode())));
-                    return res;
-                }))).match(constantly(terminate(strictQueue())),
-                Id.id())),
-                tuple(startGraph, strictStack(startNode), StrictQueue.<N>strictQueue()));
+        return foldG(c -> c.getNode().getValue() == a,
+                StrictStack::head,
+                constantly(false),
+                (s, c) -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
+                (acc, c) -> acc.snoc(c.getNode()),
+                StrictQueue.<N>strictQueue(),
+                StrictStack.<N>strictStack(startNode),
+                startGraph);
     }
 
     @SuppressWarnings("unchecked")

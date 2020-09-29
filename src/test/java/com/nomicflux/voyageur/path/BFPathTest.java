@@ -47,9 +47,11 @@ public class BFPathTest {
     }
 
     @Test
+    // TODO: should a failed search give the path traveled, or an empty path?
     public void onlyFollowsEdgeOneWay() {
         StrictQueue<Node<Integer>> res = bfPath(fromEdge(edgeFromTo(node(1), node(2))), node(2), 1);
-        assertTrue(res.isEmpty());
+        assertEquals(res.head(), just(node(2)));
+        assertEquals(res.tail().head(), nothing());
     }
 
     @Test
@@ -68,7 +70,7 @@ public class BFPathTest {
         assertEquals(res.tail().head(), just(node(2)));
         assertEquals(res.tail().tail().head(), just(node(3)));
         assertEquals(res.tail().tail().tail().tail().head(), just(node(5)));
-        assertEquals(res.tail().tail().tail().tail().tail().tail().tail().tail().tail().tail().head(), just(node(9)));
+        assertEquals(res.tail().tail().tail().tail().tail().tail().tail().tail().head(), just(node(9)));
     }
 
     @Test

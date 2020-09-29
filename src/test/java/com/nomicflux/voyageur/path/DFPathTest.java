@@ -17,26 +17,26 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DFPathTest {
-    @org.junit.Test
+    @Test
     public void nothingFoundInEmptyGraph() {
         StrictQueue<Node<Integer>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>emptyGraph(), node(1), 1);
         assertTrue(res.isEmpty());
     }
 
-    @org.junit.Test
+    @Test
     public void singletonItemFoundInSingletonGraph() {
         StrictQueue<Node<Integer>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(1), 1);
         assertEquals(res.head(), just(node(1)));
         assertEquals(res.tail().head(), nothing());
     }
 
-    @org.junit.Test
+    @Test
     public void singletonItemNotFoundFromOtherNode() {
         StrictQueue<Node<Integer>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(2), 1);
         assertTrue(res.isEmpty());
     }
 
-    @org.junit.Test
+    @Test
     public void otherItemFoundInSingleEdgeGraph() {
         StrictQueue<Node<Integer>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(1), 2);
         assertEquals(res.head(), just(node(1)));
@@ -44,13 +44,15 @@ public class DFPathTest {
         assertEquals(res.tail().tail().head(), nothing());
     }
 
-    @org.junit.Test
+    @Test
+    // TODO: should a failed search give the path traveled, or an empty path?
     public void onlyFollowsEdgeOneWay() {
         StrictQueue<Node<Integer>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(2), 1);
-        assertTrue(res.isEmpty());
+        assertEquals(res.head(), just(node(2)));
+        assertEquals(res.tail().head(), nothing());
     }
 
-    @org.junit.Test
+    @Test
     public void followsSeveralSteps() {
         StrictQueue<Node<Integer>> res = dfPath(fromEdges(asList(edgeFromTo(node(1), node(2)),
                 edgeFromTo(node(2), node(3)),
@@ -66,7 +68,7 @@ public class DFPathTest {
         assertEquals(res.tail().head(), just(node(2)));
         assertEquals(res.tail().tail().head(), just(node(3)));
         assertEquals(res.tail().tail().tail().tail().head(), just(node(5)));
-        assertEquals(res.tail().tail().tail().tail().tail().tail().tail().tail().tail().tail().head(), just(node(9)));
+        assertEquals(res.tail().tail().tail().tail().tail().tail().tail().tail().head(), just(node(9)));
     }
 
     @Test
@@ -80,8 +82,8 @@ public class DFPathTest {
                 node(1), 5);
         assertEquals(res.head(), just(node(1)));
         assertEquals(res.tail().head(), just(node(2)));
-        assertEquals(res.tail().tail().head(), just(node(3)));
-        assertEquals(res.tail().tail().tail().tail().head(), just(node(5)));
+        assertEquals(res.tail().tail().head(), just(node(4)));
+        assertEquals(res.tail().tail().tail().head(), just(node(5)));
     }
 
 }
