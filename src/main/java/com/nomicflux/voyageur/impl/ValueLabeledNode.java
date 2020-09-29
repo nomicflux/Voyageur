@@ -62,4 +62,9 @@ public final class ValueLabeledNode<A, L> implements LabeledNode<A, L> {
     public int hashCode() {
         return Objects.hash(value, label);
     }
+
+    @Override
+    public String toString() {
+        return "Node{" + label.toString() + "}<" + value.toString() + ">";
+    }
 }

@@ -4,6 +4,8 @@ import com.nomicflux.voyageur.Context;
 import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Node;
 
+import java.util.Objects;
+
 public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>> implements Context<A, N, E, I> {
     private final N node;
     private final I outboundEdges;
@@ -32,5 +34,25 @@ public final class ValueContext<A, N extends Node<A>, E extends Edge<A, N, E>, I
     @Override
     public I getInboundEdges() {
         return inboundEdges;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ValueContext<?, ?, ?, ?> that = (ValueContext<?, ?, ?, ?>) o;
+        return Objects.equals(node, that.node) &&
+                Objects.equals(outboundEdges, that.outboundEdges) &&
+                Objects.equals(inboundEdges, that.inboundEdges);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(node, outboundEdges, inboundEdges);
+    }
+
+    @Override
+    public String toString() {
+        return "Context(" + inboundEdges.toString() + " -> " + node.toString() + " <- " + outboundEdges.toString() + ")";
     }
 }

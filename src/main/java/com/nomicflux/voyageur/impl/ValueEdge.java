@@ -69,4 +69,9 @@ public final class ValueEdge<A, N extends Node<A>> implements Edge<A, N, ValueEd
     public int hashCode() {
         return Objects.hash(nodeFrom, nodeTo);
     }
+
+    @Override
+    public String toString() {
+        return "Edge[" + nodeFrom.toString() + " -> " + nodeTo.toString() + "]";
+    }
 }

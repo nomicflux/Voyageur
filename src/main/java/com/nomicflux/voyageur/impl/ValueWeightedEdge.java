@@ -85,4 +85,9 @@ public final class ValueWeightedEdge<A, N extends Node<A>, W> implements Weighte
     public int hashCode() {
         return Objects.hash(nodeFrom, nodeTo, weight);
     }
+
+    @Override
+    public String toString() {
+        return "Edge[" + nodeFrom.toString() + " -> " + nodeTo.toString() + ": " + weight.toString() + "]";
+    }
 }

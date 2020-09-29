@@ -28,15 +28,13 @@ public final class BFSearch<A, N extends Node<A>, E extends Edge<A, N, E>, I ext
 
     @Override
     public Boolean checkedApply(G startGraph, N startNode, A a) {
-        return trampoline(into((g, n) -> n.head().flatMap(x -> {
-                    return g.atNode(x).projectB().fmap(into((c, g2) -> {
-                        RecursiveResult<Tuple2<G, StrictQueue<N>>, Boolean> res =
-                                c.getNode().getValue().equals(a)
-                                        ? terminate(true)
-                                        : recurse(tuple(g2, foldLeft((n2, e2) -> n2.cons(e2.getNodeTo()), n.tail(), c.getOutboundEdges())));
-                        return res;
-                    }));
-                }).match(constantly(terminate(false)),
+        return trampoline(into((g, n) -> n.head().flatMap(x -> g.atNode(x).projectB().fmap(into((c, g2) -> {
+                    RecursiveResult<Tuple2<G, StrictQueue<N>>, Boolean> res =
+                            c.getNode().getValue().equals(a)
+                                    ? terminate(true)
+                                    : recurse(tuple(g2, foldLeft((n2, e2) -> n2.cons(e2.getNodeTo()), n.tail(), c.getOutboundEdges())));
+                    return res;
+                }))).match(constantly(terminate(false)),
                 Id.id())),
                 tuple(startGraph, strictQueue(startNode)));
     }

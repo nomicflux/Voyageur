@@ -36,4 +36,9 @@ public final class ValueNode<A> implements Node<A> {
     public int hashCode() {
         return Objects.hash(value);
     }
+
+    @Override
+    public String toString() {
+        return "Node<" + value.toString() + ">";
+    }
 }
