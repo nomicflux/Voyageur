@@ -11,7 +11,6 @@ import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.fold.FoldContinue;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.nomicflux.voyageur.fold.FoldG.foldG;
 
 public final class BFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> implements Fn3<G, N, A, StrictQueue<N>> {
     private static BFPath<?, ?, ?, ?, ?> INSTANCE = new BFPath<>();
@@ -21,14 +20,12 @@ public final class BFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I exten
 
     @Override
     public StrictQueue<N> checkedApply(G startGraph, N startNode, A a) {
-        //(s, c) -> foldLeft((acc, next) -> acc.snoc(next.getNodeTo()), s.tail(), c.getOutboundEdges())
-        return foldG(c -> c.getNode().getValue() == a,
+        return startGraph.foldG(c -> c.getNode().getValue() == a,
                 Fn1.<StrictQueue<N>, Maybe<N>>fn1(StrictQueue::head).fmap(FoldContinue::maybeTerminates),
                 (s, acc, c) -> foldLeft((ac, next) -> ac.snoc(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
                 StrictQueue.<N>strictQueue(startNode),
                 (__, acc, c) -> acc.snoc(c.getNode()),
-                StrictQueue.<N>strictQueue(),
-                startGraph);
+                StrictQueue.<N>strictQueue());
     }
 
     @SuppressWarnings("unchecked")

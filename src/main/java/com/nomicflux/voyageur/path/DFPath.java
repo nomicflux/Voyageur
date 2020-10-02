@@ -22,14 +22,12 @@ public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I exten
 
     @Override
     public StrictQueue<N> checkedApply(G startGraph, N startNode, A a) {
-        // (s, c) -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges())
-        return foldG(c -> c.getNode().getValue() == a,
+        return startGraph.foldG(c -> c.getNode().getValue() == a,
                 Fn1.<StrictStack<N>, Maybe<N>>fn1(StrictStack::head).fmap(FoldContinue::maybeTerminates),
                 (s, acc, c) -> foldLeft((ac, next) -> ac.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
                 StrictStack.<N>strictStack(startNode),
                 (__, acc, c) -> acc.snoc(c.getNode()),
-                StrictQueue.<N>strictQueue(),
-                startGraph);
+                StrictQueue.<N>strictQueue());
     }
 
     @SuppressWarnings("unchecked")

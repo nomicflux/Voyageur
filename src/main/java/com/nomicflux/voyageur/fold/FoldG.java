@@ -21,6 +21,8 @@ import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.ter
 import static com.jnape.palatable.lambda.functions.recursion.Trampoline.trampoline;
 import static com.nomicflux.voyageur.fold.FoldContinue.decompose;
 
+@Deprecated
+// Moving methods to {@link Graph} class to reduce type parameter overhead, though this may change based on performance / erogonomic factors
 public class FoldG<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>, S, Acc> {
     private static FoldG<?, ?, ?, ?, ?, ?, ?> INSTANCE = new FoldG<>();
 

@@ -13,7 +13,6 @@ import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.nomicflux.voyageur.Graph;
 import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.WeightedEdge;
-import com.nomicflux.voyageur.fold.FoldG;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -33,7 +32,7 @@ public final class Dijkstra<A, N extends Node<A>, W extends Comparable<W>, E ext
     @Override
     // TODO: Replace with Shoki heap impl; highly unsafe as it stands
     public StrictQueue<Tuple2<W, N>> checkedApply(Monoid<W> wMonoid, G startGraph, N startNode, A a) {
-        return FoldG.<A, N, E, I, G, PriorityQueue<Tuple2<W, N>>, StrictQueue<Tuple2<W, N>>>foldG(c -> c.getNode().getValue().equals(a),
+        return startGraph.<PriorityQueue<Tuple2<W, N>>, StrictQueue<Tuple2<W, N>>>foldG(c -> c.getNode().getValue().equals(a),
                 s -> maybeTerminates(Either.trying(s::peek).toMaybe().flatMap(Maybe::maybe).<N>fmap(Tuple2::_2)),
                 (s, acc, c) -> {
                     W current = Either.trying(s::peek).toMaybe().flatMap(Maybe::maybe).<W>fmap(Tuple2::_1).orElse(wMonoid.identity());
@@ -48,8 +47,7 @@ public final class Dijkstra<A, N extends Node<A>, W extends Comparable<W>, E ext
                     add(tuple(wMonoid.identity(), startNode));
                 }},
                 (s, acc, c) -> acc.snoc(Either.trying(s::poll).toMaybe().flatMap(Maybe::maybe).orElse(tuple(wMonoid.identity(), c.getNode()))),
-                StrictQueue.<Tuple2<W, N>>strictQueue(),
-                startGraph);
+                StrictQueue.<Tuple2<W, N>>strictQueue());
     }
 
     @SuppressWarnings("unchecked")

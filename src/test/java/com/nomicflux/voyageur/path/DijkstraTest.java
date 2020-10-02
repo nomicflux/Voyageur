@@ -7,11 +7,14 @@ import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueWeightedEdge;
 import org.junit.Test;
 
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.monoid.Monoid.monoid;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.impl.ValueWeightedEdge.weightedEdgeFromTo;
 import static com.nomicflux.voyageur.path.Dijkstra.dijkstra;
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 
 public class DijkstraTest {
 
@@ -24,6 +27,6 @@ public class DijkstraTest {
                         weightedEdgeFromTo(node(1), node(2), 1)));
 
         StrictQueue<Tuple2<Integer, Node<Integer>>> found = dijkstra(monoid(Integer::sum, 0), graph, node(1), 4);
-        System.out.println(found);
+        assertThat(found, hasItems(tuple(0, node(1)), tuple(1, node(2)), tuple(3, node(3)), tuple(4, node(4))));
     }
 }
