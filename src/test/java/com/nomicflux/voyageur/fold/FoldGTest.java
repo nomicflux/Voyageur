@@ -1,5 +1,7 @@
 package com.nomicflux.voyageur.fold;
 
+import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import com.nomicflux.voyageur.Node;
@@ -7,6 +9,8 @@ import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
 import org.junit.Test;
 
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
+import static com.jnape.palatable.lambda.functions.Fn1.fn1;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.nomicflux.voyageur.fold.FoldG.*;
 import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdges;
@@ -62,11 +66,10 @@ public class FoldGTest {
                 edgeFromTo(node(6), node(9)),
                 edgeFromTo(node(7), node(10))));
 
-        Integer res = guidedFold(StrictStack::head,
-                (s, c) -> s.cons(c.getNode()),
-                (acc, c) -> acc + c.getNode().getValue(),
+        Integer res = guidedFold(Fn1.<StrictStack<Node<Integer>>, Maybe<Node<Integer>>>fn1(StrictStack::head).fmap(FoldContinue::maybeTerminates),
+                (s, acc, c) -> foldLeft((a, next) -> a.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
+                StrictStack.<Node<Integer>>strictStack(node(1)), (__, acc, c) -> acc + c.getNode().getValue(),
                 0,
-                StrictStack.<Node<Integer>>strictStack(node(1)),
                 graph);
 
         assertEquals(55, res);
@@ -84,11 +87,10 @@ public class FoldGTest {
                 edgeFromTo(node(6), node(9)),
                 edgeFromTo(node(7), node(10))));
 
-        Integer res = guidedFold(StrictQueue::head,
-                (s, c) -> s.cons(c.getNode()),
-                (acc, c) -> acc + c.getNode().getValue(),
+        Integer res = guidedFold(Fn1.<StrictQueue<Node<Integer>>, Maybe<Node<Integer>>>fn1(StrictQueue::head).fmap(FoldContinue::maybeTerminates),
+                (s, acc, c) -> foldLeft((a, next) -> a.snoc(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
+                StrictQueue.<Node<Integer>>strictQueue(node(1)), (__, acc, c) -> acc + c.getNode().getValue(),
                 0,
-                StrictQueue.<Node<Integer>>strictQueue(node(1)),
                 graph);
 
         assertEquals(55, res);
@@ -109,11 +111,10 @@ public class FoldGTest {
 
         Integer res = guidedCutFold(
                 c -> c.getNode().getValue() == 8,
-                StrictStack::head,
-                (s, c) -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
-                (acc, c) -> acc + c.getNode().getValue(),
+                Fn1.<StrictStack<Node<Integer>>, Maybe<Node<Integer>>>fn1(StrictStack::head).fmap(FoldContinue::maybeTerminates),
+                (s, acc, c) -> foldLeft((a, next) -> a.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
+                StrictStack.<Node<Integer>>strictStack(node(1)), (__, acc, c) -> acc + c.getNode().getValue(),
                 0,
-                StrictStack.<Node<Integer>>strictStack(node(1)),
                 graph);
 
         assertEquals(48, res);
@@ -134,11 +135,10 @@ public class FoldGTest {
 
         Integer res = guidedCutFold(
                 c -> c.getNode().getValue() == 8,
-                StrictQueue::head,
-                (s, c) -> foldLeft((acc, next) -> acc.snoc(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
-                (acc, c) -> acc + c.getNode().getValue(),
+                Fn1.<StrictQueue<Node<Integer>>, Maybe<Node<Integer>>>fn1(StrictQueue::head).fmap(FoldContinue::maybeTerminates),
+                (s, acc, c) -> foldLeft((a, next) -> a.snoc(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
+                StrictQueue.<Node<Integer>>strictQueue(node(1)), (__, acc, c) -> acc + c.getNode().getValue(),
                 0,
-                StrictQueue.<Node<Integer>>strictQueue(node(1)),
                 graph);
 
         assertEquals(36, res);

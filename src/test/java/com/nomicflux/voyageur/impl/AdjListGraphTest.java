@@ -16,6 +16,7 @@ import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -113,5 +114,30 @@ public class AdjListGraphTest {
         assertFalse(c3.getInboundEdges().contains(edge13));
         assertTrue(c2.getOutboundEdges().contains(edge23));
         assertTrue(c3.getInboundEdges().contains(edge23));
+    }
+
+    @Test
+    public void addsLinearChains() {
+        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChain(asList(1, 2, 3, 4, 5));
+        Context<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>, HashSet<ValueEdge<Integer, ValueNode<Integer>>>> c2 = graph.atNode(node(2)).projectB().orElseThrow(AssertionError::new)._1();
+        Context<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>, HashSet<ValueEdge<Integer, ValueNode<Integer>>>> c5 = graph.atNode(node(5)).projectB().orElseThrow(AssertionError::new)._1();
+        assertTrue(c2.getInboundEdges().contains(edgeFromTo(node(1), node(2))));
+        assertTrue(c2.getOutboundEdges().contains(edgeFromTo(node(2), node(3))));
+        assertTrue(c5.getInboundEdges().contains(edgeFromTo(node(4), node(5))));
+        assertTrue(c5.getOutboundEdges().isEmpty());
+    }
+
+    @Test
+    public void addsMultipleChains() {
+        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3), asList(2, 4, 5), asList(3, 4, 6)));
+        Context<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>, HashSet<ValueEdge<Integer, ValueNode<Integer>>>> c2 = graph.atNode(node(2)).projectB().orElseThrow(AssertionError::new)._1();
+        Context<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>, HashSet<ValueEdge<Integer, ValueNode<Integer>>>> c4 = graph.atNode(node(4)).projectB().orElseThrow(AssertionError::new)._1();
+        assertTrue(c2.getInboundEdges().contains(edgeFromTo(node(1), node(2))));
+        assertTrue(c2.getOutboundEdges().contains(edgeFromTo(node(2), node(3))));
+        assertTrue(c2.getOutboundEdges().contains(edgeFromTo(node(2), node(4))));
+        assertTrue(c4.getInboundEdges().contains(edgeFromTo(node(2), node(4))));
+        assertTrue(c4.getInboundEdges().contains(edgeFromTo(node(3), node(4))));
+        assertTrue(c4.getOutboundEdges().contains(edgeFromTo(node(4), node(5))));
+        assertTrue(c4.getOutboundEdges().contains(edgeFromTo(node(4), node(6))));
     }
 }

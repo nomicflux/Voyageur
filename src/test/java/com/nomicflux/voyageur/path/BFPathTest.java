@@ -1,22 +1,21 @@
 package com.nomicflux.voyageur.path;
 
-import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
+import com.nomicflux.voyageur.impl.ValueNode;
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdge;
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdges;
+import static com.nomicflux.voyageur.impl.AdjListGraph.*;
 import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.path.BFPath.bfPath;
-import static com.nomicflux.voyageur.search.BFSearch.bfSearch;
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BFPathTest {
     @Test
@@ -56,15 +55,7 @@ public class BFPathTest {
 
     @Test
     public void followsSeveralSteps() {
-        StrictQueue<Node<Integer>> res = bfPath(fromEdges(asList(edgeFromTo(node(1), node(2)),
-                edgeFromTo(node(2), node(3)),
-                edgeFromTo(node(3), node(4)),
-                edgeFromTo(node(4), node(5)),
-                edgeFromTo(node(5), node(6)),
-                edgeFromTo(node(6), node(7)),
-                edgeFromTo(node(7), node(8)),
-                edgeFromTo(node(8), node(9)),
-                edgeFromTo(node(9), node(10)))),
+        StrictQueue<ValueNode<Integer>> res = bfPath(fromChain(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
                 node(1), 10);
         assertEquals(res.head(), just(node(1)));
         assertEquals(res.tail().head(), just(node(2)));
@@ -75,12 +66,7 @@ public class BFPathTest {
 
     @Test
     public void evenWithCycles() {
-        StrictQueue<Node<Integer>> res = bfPath(fromEdges(asList(edgeFromTo(node(1), node(2)),
-                edgeFromTo(node(2), node(3)),
-                edgeFromTo(node(2), node(4)),
-                edgeFromTo(node(4), node(1)),
-                edgeFromTo(node(3), node(1)),
-                edgeFromTo(node(4), node(5)))),
+        StrictQueue<ValueNode<Integer>> res = bfPath(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(4, 5))),
                 node(1), 5);
         assertEquals(res.head(), just(node(1)));
         assertEquals(res.tail().head(), just(node(2)));

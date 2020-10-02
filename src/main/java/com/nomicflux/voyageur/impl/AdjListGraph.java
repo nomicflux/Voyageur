@@ -4,6 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.choice.Choice2;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.Fn2;
+import com.jnape.palatable.lambda.functions.builtin.fn2.Zip;
 import com.jnape.palatable.shoki.impl.HashMap;
 import com.jnape.palatable.shoki.impl.HashSet;
 import com.nomicflux.voyageur.Context;
@@ -13,10 +14,15 @@ import com.nomicflux.voyageur.Node;
 
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Drop.drop;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Zip.zip;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.nomicflux.voyageur.impl.ValueContext.context;
+import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
+import static com.nomicflux.voyageur.impl.ValueNode.node;
 
 public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> implements Graph<A, N, E, HashSet<E>, AdjListGraph<A, N, E>> {
     private final HashMap<N, Tuple2<HashSet<E>, HashSet<E>>> graph;
@@ -44,6 +50,19 @@ public final class AdjListGraph<A, N extends Node<A>, E extends Edge<A, N, E>> i
     public static <A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>> AdjListGraph<A, N, E> fromEdges(I edges) {
         AdjListGraph<A, N, E> empty = AdjListGraph.<A, N, E>emptyGraph();
         return foldLeft(AdjListGraph::addEdge, empty, edges);
+    }
+
+    public static <A> AdjListGraph<A, ValueNode<A>, ValueEdge<A, ValueNode<A>>> fromChain(Iterable<A> values) {
+        return addFromChain(emptyGraph(), values);
+    }
+
+    private static <A> AdjListGraph<A, ValueNode<A>, ValueEdge<A, ValueNode<A>>> addFromChain(AdjListGraph<A, ValueNode<A>, ValueEdge<A, ValueNode<A>>> graph, Iterable<A> values) {
+        return foldLeft((acc, next) -> acc.addEdge(edgeFromTo(node(next._1()), node(next._2()))), graph, zip(values, drop(1, values)));
+    }
+
+    public static <A> AdjListGraph<A, ValueNode<A>, ValueEdge<A, ValueNode<A>>> fromChains(Iterable<Iterable<A>> values) {
+        AdjListGraph<A, ValueNode<A>, ValueEdge<A, ValueNode<A>>> empty = emptyGraph();
+        return foldLeft(AdjListGraph::addFromChain, empty, values);
     }
 
     @Override

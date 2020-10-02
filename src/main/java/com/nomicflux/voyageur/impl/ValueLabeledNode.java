@@ -16,27 +16,27 @@ public final class ValueLabeledNode<A, L> implements LabeledNode<A, L> {
         this.label = label;
     }
 
-    public static <A, L> LabeledNode<A, L> labeledNode(A a, L label) {
+    public static <A, L> ValueLabeledNode<A, L> labeledNode(A a, L label) {
         return new ValueLabeledNode<A, L>(a, label);
     }
 
-    public static <A, L> Fn1<L, LabeledNode<A, L>> labeledNode(A a) {
+    public static <A, L> Fn1<L, ValueLabeledNode<A, L>> labeledNode(A a) {
         return label -> labeledNode(a, label);
     }
 
-    public static <A, L> Fn2<A, L, LabeledNode<A, L>> labeledNode() {
+    public static <A, L> Fn2<A, L, ValueLabeledNode<A, L>> labeledNode() {
         return ValueLabeledNode::labeledNode;
     }
 
-    public static <A, L> LabeledNode<A, L> labelNode(Node<A> node, L label) {
+    public static <A, L> ValueLabeledNode<A, L> labelNode(Node<A> node, L label) {
         return new ValueLabeledNode<A, L>(node.getValue(), label);
     }
 
-    public static <A, L> Fn1<L, LabeledNode<A, L>> labelNode(Node<A> node) {
+    public static <A, L> Fn1<L, ValueLabeledNode<A, L>> labelNode(Node<A> node) {
         return label -> labelNode(node, label);
     }
 
-    public static <A, L> Fn2<Node<A>, L, LabeledNode<A, L>> labelNode() {
+    public static <A, L> Fn2<Node<A>, L, ValueLabeledNode<A, L>> labelNode() {
         return ValueLabeledNode::labelNode;
     }
 

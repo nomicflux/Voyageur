@@ -1,27 +1,17 @@
 package com.nomicflux.voyageur.path;
 
-import com.jnape.palatable.lambda.adt.hlist.Tuple3;
+import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.functions.Fn3;
-import com.jnape.palatable.lambda.functions.builtin.fn1.Id;
-import com.jnape.palatable.lambda.functions.recursion.RecursiveResult;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Graph;
 import com.nomicflux.voyageur.Node;
+import com.nomicflux.voyageur.fold.FoldContinue;
 
-import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
-import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Into3.into3;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.recurse;
-import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.terminate;
-import static com.jnape.palatable.lambda.functions.recursion.Trampoline.trampoline;
-import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
-import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static com.nomicflux.voyageur.fold.FoldG.foldG;
 
 public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> implements Fn3<G, N, A, StrictQueue<N>> {
@@ -32,13 +22,13 @@ public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I exten
 
     @Override
     public StrictQueue<N> checkedApply(G startGraph, N startNode, A a) {
+        // (s, c) -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges())
         return foldG(c -> c.getNode().getValue() == a,
-                StrictStack::head,
-                constantly(false),
-                (s, c) -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
-                (acc, c) -> acc.snoc(c.getNode()),
-                StrictQueue.<N>strictQueue(),
+                Fn1.<StrictStack<N>, Maybe<N>>fn1(StrictStack::head).fmap(FoldContinue::maybeTerminates),
+                (s, acc, c) -> foldLeft((ac, next) -> ac.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()),
                 StrictStack.<N>strictStack(startNode),
+                (__, acc, c) -> acc.snoc(c.getNode()),
+                StrictQueue.<N>strictQueue(),
                 startGraph);
     }
 

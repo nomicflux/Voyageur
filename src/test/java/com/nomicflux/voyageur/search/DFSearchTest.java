@@ -5,8 +5,7 @@ import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
 import org.junit.Test;
 
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdge;
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdges;
+import static com.nomicflux.voyageur.impl.AdjListGraph.*;
 import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.search.DFSearch.dfSearch;
@@ -42,38 +41,20 @@ public class DFSearchTest {
 
     @Test
     public void followsSeveralSteps() {
-        assertTrue(dfSearch(fromEdges(asList(edgeFromTo(node(1), node(2)),
-                edgeFromTo(node(2), node(3)),
-                edgeFromTo(node(3), node(4)),
-                edgeFromTo(node(4), node(5)),
-                edgeFromTo(node(5), node(6)),
-                edgeFromTo(node(6), node(7)),
-                edgeFromTo(node(7), node(8)),
-                edgeFromTo(node(8), node(9)),
-                edgeFromTo(node(9), node(10)))),
+        assertTrue(dfSearch(fromChain(asList(1,2,3,4,5,6,7,8,9,10)),
                 node(1), 10));
     }
 
     @Test
     public void evenWithCycles() {
-        assertTrue(dfSearch(fromEdges(asList(edgeFromTo(node(1), node(2)),
-                edgeFromTo(node(2), node(3)),
-                edgeFromTo(node(2), node(4)),
-                edgeFromTo(node(4), node(1)),
-                edgeFromTo(node(3), node(1)),
-                edgeFromTo(node(3), node(5)))),
+        assertTrue(dfSearch(fromChains(asList(asList(1,2,3,5), asList(2,4,1), asList(3,1))),
                 node(1), 5));
     }
 
 
     @Test
     public void neverReachesDisconnections() {
-        assertFalse(dfSearch(fromEdges(asList(edgeFromTo(node(1), node(2)),
-                edgeFromTo(node(2), node(3)),
-                edgeFromTo(node(2), node(4)),
-                edgeFromTo(node(4), node(1)),
-                edgeFromTo(node(3), node(1)),
-                edgeFromTo(node(5), node(5)))),
+        assertFalse(dfSearch(fromChains(asList(asList(1,2,3,1), asList(2,4,1), asList(5,5))),
                 node(1), 5));
     }
 }

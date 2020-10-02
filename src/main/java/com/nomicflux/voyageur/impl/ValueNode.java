@@ -12,11 +12,11 @@ public final class ValueNode<A> implements Node<A> {
         this.value = value;
     }
 
-    public static <A> Node<A> node(A a) {
+    public static <A> ValueNode<A> node(A a) {
         return new ValueNode<A>(a);
     }
 
-    public static <A> Fn1<A, Node<A>> node() {
+    public static <A> Fn1<A, ValueNode<A>> node() {
         return ValueNode::node;
     }
 
