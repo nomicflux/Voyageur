@@ -18,11 +18,14 @@ import com.nomicflux.voyageur.WeightedEdge;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Tupler2.tupler;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.lambda.functor.builtin.State.state;
 import static com.jnape.palatable.lambda.io.IO.io;
-import static com.nomicflux.voyageur.fold.FoldContinue.maybeTerminates;
+import static com.nomicflux.voyageur.fold.FoldContinue.nodeOrTerminate;
 
 public final class Dijkstra<A, N extends Node<A>, W extends Comparable<W>, E extends WeightedEdge<A, N, W, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> implements Fn4<Monoid<W>, G, N, A, StrictQueue<Tuple2<W, N>>> {
     private static Dijkstra<?, ?, ?, ?, ?, ?> INSTANCE = new Dijkstra<>();
@@ -33,22 +36,21 @@ public final class Dijkstra<A, N extends Node<A>, W extends Comparable<W>, E ext
     @Override
     // TODO: Replace with Shoki heap impl; highly unsafe as it stands
     public StrictQueue<Tuple2<W, N>> checkedApply(Monoid<W> wMonoid, G startGraph, N startNode, A a) {
-        return startGraph.<PriorityQueue<Tuple2<W, N>>, StrictQueue<Tuple2<W, N>>>foldG(c -> c.getNode().getValue().equals(a),
-                maybeTerminates(s -> Monad.join(Either.trying(s::peek).fmap(Maybe::maybe).toMaybe()).<N>fmap(Tuple2::_2)),
-                (s, acc, mc) -> mc.match(constantly(s),
-                        c -> {
-                            W current = Monad.join(Either.trying(s::peek).fmap(Maybe::maybe).toMaybe()).<W>fmap(Tuple2::_1).orElse(wMonoid.identity());
-                            return foldLeft((IO<PriorityQueue<Tuple2<W, N>>> ac, E next) -> ac
-                                            .flatMap(s_ -> io(() -> s_.add(tuple(wMonoid.apply(current, next.getWeight()), next.getNodeTo())))
-                                                    .safe().fmap(constantly(s_))),
-                                    io(() -> s),
-                                    c.getOutboundEdges())
-                                    .unsafePerformIO();
-                        }),
-                new PriorityQueue<Tuple2<W, N>>(Comparator.comparing(Tuple2::_1)) {{
+        return startGraph.<Tuple2<Maybe<Tuple2<W, N>>, PriorityQueue<Tuple2<W, N>>>, StrictQueue<Tuple2<W, N>>>guidedCutFold(c -> c.getNode().getValue().equals(a),
+                state(s -> io(() -> Monad.join(Either.trying(() -> s._2().poll()).fmap(Maybe::maybe).toMaybe()))
+                        .fmap(t -> tuple(nodeOrTerminate(t.fmap(Tuple2::_2)), tuple(t, s._2())))
+                        .unsafePerformIO()),
+                (acc, c) -> state(s -> tuple(acc.snoc(s._1().orElse(tuple(wMonoid.identity(), c.getNode()))),
+                        foldLeft((IO<PriorityQueue<Tuple2<W, N>>> ac, E next) -> ac
+                                        .flatMap(s_ -> io(() -> s_.add(tuple(wMonoid.apply(s._1().fmap(Tuple2::_1).orElse(wMonoid.identity()), next.getWeight()), next.getNodeTo())))
+                                                .safe().fmap(constantly(s_))),
+                                io(s::_2),
+                                c.getOutboundEdges())
+                                .fmap(tupler(s._1()))
+                                .unsafePerformIO())),
+                tuple(nothing(), new PriorityQueue<Tuple2<W, N>>(Comparator.comparing(Tuple2::_1)) {{
                     add(tuple(wMonoid.identity(), startNode));
-                }},
-                (s, acc, c) -> acc.snoc(Either.trying(s::poll).toMaybe().flatMap(Maybe::maybe).orElse(tuple(wMonoid.identity(), c.getNode()))),
+                }}),
                 StrictQueue.<Tuple2<W, N>>strictQueue());
     }
 

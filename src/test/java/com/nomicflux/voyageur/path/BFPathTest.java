@@ -14,6 +14,8 @@ import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.path.BFPath.bfPath;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.hasItems;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -68,16 +70,13 @@ public class BFPathTest {
     public void evenWithCycles() {
         StrictQueue<ValueNode<Integer>> res = bfPath(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(4, 5))),
                 node(1), 5);
-        assertEquals(res.head(), just(node(1)));
-        assertEquals(res.tail().head(), just(node(2)));
-        assertEquals(res.tail().tail().head(), just(node(3)));
-        assertEquals(res.tail().tail().tail().tail().head(), just(node(5)));
+        assertThat(res, hasItems(node(1), node(2), node(3), node(4), node(5)));
     }
 
     @Test
     public void catchesRepeatsInQueue() {
         AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(0, 2, 4, 6, 8, 10), asList(1, 3, 5, 7, 9), asList(0, 3, 6, 9), asList(0, 5, 10)));
         StrictQueue<ValueNode<Integer>> res = bfPath(graph, node(0), 10);
-        assertEquals(res.reverse().head(), just(node(10)));
+        assertEquals(just(node(10)), res.reverse().head());
     }
 }

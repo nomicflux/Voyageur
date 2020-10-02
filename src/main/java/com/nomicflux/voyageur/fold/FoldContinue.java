@@ -21,9 +21,21 @@ public abstract class FoldContinue<N> implements CoProduct3<Unit, Unit, N, FoldC
     }
 
     @SuppressWarnings("unchecked")
+    public static <S, N> FoldContinue<N> nodeOrTerminate(Maybe<N> node) {
+        return node.match(constantly((FoldContinue<N>) EndFold.INSTANCE),
+                FoldContinue::nextNode);
+    }
+
+    @SuppressWarnings("unchecked")
     public static <S, N> Fn1<S, FoldContinue<N>> maybeContinues(Fn1<S, Maybe<N>> node) {
         return node.fmap(n -> n.match(constantly((FoldContinue<N>) Decompose.INSTANCE),
                 FoldContinue::nextNode));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S, N> FoldContinue<N> nodeOrContinue(Maybe<N> node) {
+        return node.match(constantly((FoldContinue<N>) Decompose.INSTANCE),
+                FoldContinue::nextNode);
     }
 
     @SuppressWarnings("unchecked")

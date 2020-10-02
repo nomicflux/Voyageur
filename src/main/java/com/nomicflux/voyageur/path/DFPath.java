@@ -9,9 +9,10 @@ import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Graph;
 import com.nomicflux.voyageur.Node;
 
-import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.nomicflux.voyageur.fold.FoldContinue.maybeTerminates;
+import static com.jnape.palatable.lambda.functor.builtin.State.state;
+import static com.nomicflux.voyageur.fold.FoldContinue.nodeOrTerminate;
 
 public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> implements Fn3<G, N, A, StrictQueue<N>> {
     private static DFPath<?, ?, ?, ?, ?> INSTANCE = new DFPath<>();
@@ -21,12 +22,10 @@ public final class DFPath<A, N extends Node<A>, E extends Edge<A, N, E>, I exten
 
     @Override
     public StrictQueue<N> checkedApply(G startGraph, N startNode, A a) {
-        return startGraph.foldG(c -> c.getNode().getValue().equals(a),
-                maybeTerminates(StrictStack::head),
-                (s, acc, mc) -> mc.match(constantly(s.tail()),
-                        c -> foldLeft((ac, next) -> ac.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges())),
+        return startGraph.guidedCutFold(c -> c.getNode().getValue().equals(a),
+                state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
+                (acc, c) -> state(s -> tuple(acc.snoc(c.getNode()), foldLeft((ac, next) -> ac.cons(next.getNodeTo()), s, c.getOutboundEdges()))),
                 StrictStack.<N>strictStack(startNode),
-                (__, acc, c) -> acc.snoc(c.getNode()),
                 StrictQueue.<N>strictQueue());
     }
 
