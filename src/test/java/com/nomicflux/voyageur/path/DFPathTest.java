@@ -74,4 +74,10 @@ public class DFPathTest {
         assertEquals(res.tail().tail().tail().head(), just(node(5)));
     }
 
+    @Test
+    public void catchesRepeatsInQueue() {
+        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(0, 2, 4, 6, 8, 10), asList(1, 3, 5, 7, 9), asList(0, 3, 6, 9), asList(0, 5, 10)));
+        StrictQueue<ValueNode<Integer>> res = dfPath(graph, node(0), 10);
+        assertEquals(res.reverse().head(), just(node(10)));
+    }
 }

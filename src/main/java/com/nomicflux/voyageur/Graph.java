@@ -53,6 +53,7 @@ public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends 
     }
 
     @SuppressWarnings("unchecked")
+    // TODO: doesn't handle cases where the state S finds a node that was already visited, but isn't empty yet
     default <S, Acc> Acc foldG(Fn1<Context<A, N, E, I>, Boolean> destinationCheck,
                                Fn1<S, FoldContinue<N>> contextGetter,
                                Fn3<S, Acc, Context<A, N, E, I>, S> updateState,
