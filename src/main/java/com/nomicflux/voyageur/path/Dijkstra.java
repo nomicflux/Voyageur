@@ -8,6 +8,7 @@ import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.functions.Fn3;
 import com.jnape.palatable.lambda.functions.Fn4;
 import com.jnape.palatable.lambda.io.IO;
+import com.jnape.palatable.lambda.monad.Monad;
 import com.jnape.palatable.lambda.monoid.Monoid;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.nomicflux.voyageur.Graph;
@@ -33,16 +34,17 @@ public final class Dijkstra<A, N extends Node<A>, W extends Comparable<W>, E ext
     // TODO: Replace with Shoki heap impl; highly unsafe as it stands
     public StrictQueue<Tuple2<W, N>> checkedApply(Monoid<W> wMonoid, G startGraph, N startNode, A a) {
         return startGraph.<PriorityQueue<Tuple2<W, N>>, StrictQueue<Tuple2<W, N>>>foldG(c -> c.getNode().getValue().equals(a),
-                s -> maybeTerminates(Either.trying(s::peek).toMaybe().flatMap(Maybe::maybe).<N>fmap(Tuple2::_2)),
-                (s, acc, c) -> {
-                    W current = Either.trying(s::peek).toMaybe().flatMap(Maybe::maybe).<W>fmap(Tuple2::_1).orElse(wMonoid.identity());
-                    return foldLeft((IO<PriorityQueue<Tuple2<W, N>>> ac, E next) -> ac
-                                    .flatMap(s_ -> io(() -> s_.add(tuple(wMonoid.apply(current, next.getWeight()), next.getNodeTo())))
-                                            .fmap(constantly(s_))),
-                            io(() -> s),
-                            c.getOutboundEdges())
-                            .unsafePerformIO();
-                },
+                maybeTerminates(s -> Monad.join(Either.trying(s::peek).fmap(Maybe::maybe).toMaybe()).<N>fmap(Tuple2::_2)),
+                (s, acc, mc) -> mc.match(constantly(s),
+                        c -> {
+                            W current = Monad.join(Either.trying(s::peek).fmap(Maybe::maybe).toMaybe()).<W>fmap(Tuple2::_1).orElse(wMonoid.identity());
+                            return foldLeft((IO<PriorityQueue<Tuple2<W, N>>> ac, E next) -> ac
+                                            .flatMap(s_ -> io(() -> s_.add(tuple(wMonoid.apply(current, next.getWeight()), next.getNodeTo())))
+                                                    .safe().fmap(constantly(s_))),
+                                    io(() -> s),
+                                    c.getOutboundEdges())
+                                    .unsafePerformIO();
+                        }),
                 new PriorityQueue<Tuple2<W, N>>(Comparator.comparing(Tuple2::_1)) {{
                     add(tuple(wMonoid.identity(), startNode));
                 }},

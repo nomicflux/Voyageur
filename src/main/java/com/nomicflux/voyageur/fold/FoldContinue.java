@@ -15,15 +15,15 @@ public abstract class FoldContinue<N> implements CoProduct3<Unit, Unit, N, FoldC
     }
 
     @SuppressWarnings("unchecked")
-    public static <N> FoldContinue<N> maybeTerminates(Maybe<N> node) {
-        return node.match(constantly((FoldContinue<N>) EndFold.INSTANCE),
-                FoldContinue::nextNode);
+    public static <S, N> Fn1<S, FoldContinue<N>> maybeTerminates(Fn1<S, Maybe<N>> node) {
+        return node.fmap(n -> n.match(constantly((FoldContinue<N>) EndFold.INSTANCE),
+                FoldContinue::nextNode));
     }
 
     @SuppressWarnings("unchecked")
-    public static <N> FoldContinue<N> maybeContinues(Maybe<N> node) {
-        return node.match(constantly((FoldContinue<N>) Decompose.INSTANCE),
-                FoldContinue::nextNode);
+    public static <S, N> Fn1<S, FoldContinue<N>> maybeContinues(Fn1<S, Maybe<N>> node) {
+        return node.fmap(n -> n.match(constantly((FoldContinue<N>) Decompose.INSTANCE),
+                FoldContinue::nextNode));
     }
 
     @SuppressWarnings("unchecked")

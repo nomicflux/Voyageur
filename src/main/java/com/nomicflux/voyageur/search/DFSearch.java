@@ -10,6 +10,7 @@ import com.nomicflux.voyageur.Edge;
 import com.nomicflux.voyageur.Graph;
 import com.nomicflux.voyageur.Node;
 
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 
 public final class DFSearch<A, N extends Node<A>, E extends Edge<A, N, E>, I extends Iterable<E>, G extends Graph<A, N, E, I, G>> extends Search<A, N, E, I, G, StrictStack<N>> {
@@ -24,8 +25,9 @@ public final class DFSearch<A, N extends Node<A>, E extends Edge<A, N, E>, I ext
     }
 
     @Override
-    StrictStack<N> nextState(StrictStack<N> s, Context<A, N, E, I> c) {
-        return foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges());
+    StrictStack<N> nextState(StrictStack<N> s, Maybe<Context<A, N, E, I>> mc) {
+        return mc.match(constantly(s.tail()),
+                c -> foldLeft((acc, next) -> acc.cons(next.getNodeTo()), s.tail(), c.getOutboundEdges()));
     }
 
     @Override

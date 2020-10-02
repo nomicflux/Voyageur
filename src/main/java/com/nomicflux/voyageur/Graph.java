@@ -8,6 +8,7 @@ import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.functions.Fn3;
 import com.nomicflux.voyageur.fold.FoldContinue;
 
+import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
@@ -53,29 +54,35 @@ public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends 
     }
 
     @SuppressWarnings("unchecked")
-    // TODO: doesn't handle cases where the state S finds a node that was already visited, but isn't empty yet
+    // TODO: Some of the complexity may be due to not properly handling state transformations.
+    // Checking the state to get the next node / context should update the state (pulling from a stack, etc.),
+    // and the complexity around updateState reflects this. However, often the currently state is being used as more than
+    // just the next node to search for, so we can't dump it yet - is it less complicated to carry around a type parameter
+    // for "Node Environment Info" which can be handed off with the Maybe<N>?.
     default <S, Acc> Acc foldG(Fn1<Context<A, N, E, I>, Boolean> destinationCheck,
                                Fn1<S, FoldContinue<N>> contextGetter,
-                               Fn3<S, Acc, Context<A, N, E, I>, S> updateState,
+                               Fn3<S, Acc, Maybe<Context<A, N, E, I>>, S> updateState,
                                S defState,
                                Fn3<S, Acc, Context<A, N, E, I>, Acc> accumulator,
                                Acc defAcc) {
         return trampoline(into3((G g, S state, Acc acc) -> {
                     return contextGetter.apply(state)
-                            .<Maybe<Tuple2<Context<A, N, E, I>, G>>>match(constantly(nothing()),
-                                    constantly(g.decompose()),
-                                    n -> g.atNode(n).projectB())
+                            .<Maybe<Choice2<G, Tuple2<Context<A, N, E, I>, G>>>>match(constantly(nothing()),
+                                    constantly(g.decompose().fmap(Choice2::b)),
+                                    n -> just(g.atNode(n)))
                             .match(constantly(terminate(acc)),
-                                    c -> destinationCheck.apply(c._1())
-                                            ? terminate(accumulator.apply(state, acc, c._1()))
-                                            : recurse(tuple(c._2(), updateState.apply(state, acc, c._1()), accumulator.apply(state, acc, c._1()))));
+                                    gc -> gc.match(g_ -> recurse(tuple(g_, updateState.apply(state, acc, nothing()), acc)),
+                                            c -> destinationCheck.apply(c._1())
+                                                    ? terminate(accumulator.apply(state, acc, c._1()))
+                                                    : recurse(tuple(c._2(), updateState.apply(state, acc, just(c._1())), accumulator.apply(state, acc, c._1())))));
                 }),
                 tuple((G) this, defState, defAcc));
     }
 
     default <S, Acc> Acc guidedFold(Fn1<S, FoldContinue<N>> contextGetter,
-                                    Fn3<S, Acc, Context<A, N, E, I>, S> updateState,
-                                    S defState, Fn3<S, Acc, Context<A, N, E, I>, Acc> accumulator,
+                                    Fn3<S, Acc, Maybe<Context<A, N, E, I>>, S> updateState,
+                                    S defState,
+                                    Fn3<S, Acc, Context<A, N, E, I>, Acc> accumulator,
                                     Acc defAcc) {
         return foldG(constantly(false), contextGetter, updateState, defState, accumulator, defAcc);
     }
@@ -83,7 +90,12 @@ public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends 
     default <Acc> Acc simpleCutFold(Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
                                     Fn1<Context<A, N, E, I>, Boolean> destinationCheck,
                                     Acc defAcc) {
-        return foldG(destinationCheck, constantly(FoldContinue.decompose()), (_s, _acc, _c) -> UNIT, UNIT, (__, acc, c) -> accumulator.apply(acc, c), defAcc);
+        return foldG(destinationCheck,
+                constantly(FoldContinue.decompose()),
+                (_s, _acc, _c) -> UNIT,
+                UNIT,
+                (__, acc, c) -> accumulator.apply(acc, c),
+                defAcc);
     }
 
     default <Acc> Acc simpleFold(Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
