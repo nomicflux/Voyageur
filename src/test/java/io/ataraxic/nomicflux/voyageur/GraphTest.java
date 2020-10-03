@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.functor.builtin.State.state;
+import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static io.ataraxic.nomicflux.voyageur.fold.FoldContinue.nodeOrTerminate;
 import static io.ataraxic.nomicflux.voyageur.impl.AdjListGraph.fromChains;
 import static io.ataraxic.nomicflux.voyageur.impl.ValueNode.node;
