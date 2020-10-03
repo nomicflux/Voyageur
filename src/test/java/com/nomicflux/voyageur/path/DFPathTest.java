@@ -1,9 +1,9 @@
 package com.nomicflux.voyageur.path;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.impl.StrictQueue;
-import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
 import com.nomicflux.voyageur.impl.ValueNode;
@@ -23,26 +23,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DFPathTest {
     @Test
     public void nothingFoundInEmptyGraph() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Node<Integer>>>, Node<Integer>>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>emptyGraph(), node(1), 1);
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(AdjListGraph.<Integer, Unit, Unit>emptyGraph(), node(1), 1);
         assertTrue(res.isEmpty());
     }
 
     @Test
     public void singletonItemFoundInSingletonGraph() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Node<Integer>>>, Node<Integer>>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(1), 1);
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(AdjListGraph.<Integer, Unit, Unit>singletonGraph(node(1)), node(1), 1);
         assertEquals(res.head(), just(tuple(nothing(), node(1))));
         assertEquals(res.tail().head(), nothing());
     }
 
     @Test
     public void singletonItemNotFoundFromOtherNode() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Node<Integer>>>, Node<Integer>>> res = dfPath(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(2), 1);
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(AdjListGraph.<Integer, Unit, Unit>singletonGraph(node(1)), node(2), 1);
         assertTrue(res.isEmpty());
     }
 
     @Test
     public void otherItemFoundInSingleEdgeGraph() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Node<Integer>>>, Node<Integer>>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(1), 2);
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(1), 2);
         assertEquals(res.head(), just(tuple(nothing(), node(1))));
         assertEquals(res.tail().head(), just(tuple(just(edgeFromTo(node(1), node(2))), node(2))));
         assertEquals(res.tail().tail().head(), nothing());
@@ -51,14 +51,14 @@ public class DFPathTest {
     @Test
     // TODO: should a failed search give the path traveled, or an empty path?
     public void onlyFollowsEdgeOneWay() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Node<Integer>>>, Node<Integer>>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(2), 1);
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(fromEdge(edgeFromTo(node(1), node(2))), node(2), 1);
         assertEquals(res.head(), just(tuple(nothing(), node(2))));
         assertEquals(res.tail().head(), nothing());
     }
 
     @Test
     public void followsSeveralSteps() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, ValueNode<Integer>>>, ValueNode<Integer>>> res = dfPath(fromChain(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(fromChain(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
                 node(1), 10);
         assertEquals(res.head(), just(tuple(nothing(), node(1))));
         assertEquals(res.tail().head(), just(tuple(just(edgeFromTo(node(1), node(2))), node(2))));
@@ -69,7 +69,7 @@ public class DFPathTest {
 
     @Test
     public void evenWithCycles() {
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, ValueNode<Integer>>>, ValueNode<Integer>>> res = dfPath(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(4, 5))),
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(4, 5))),
                 node(1), 5);
         assertEquals(res.head(), just(tuple(nothing(), node(1))));
         assertEquals(res.tail().head(), just(tuple(just(edgeFromTo(node(1), node(2))), node(2))));
@@ -79,8 +79,8 @@ public class DFPathTest {
 
     @Test
     public void catchesRepeatsInQueue() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(0, 2, 4, 6, 8, 10), asList(1, 3, 5, 7, 9), asList(0, 3, 6, 9), asList(0, 5, 10)));
-        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, ValueNode<Integer>>>, ValueNode<Integer>>> res = dfPath(graph, node(0), 10);
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(0, 2, 4, 6, 8, 10), asList(1, 3, 5, 7, 9), asList(0, 3, 6, 9), asList(0, 5, 10)));
+        StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = dfPath(graph, node(0), 10);
         assertEquals(res.reverse().head(), just(tuple(just(edgeFromTo(node(5), node(10))), node(10))));
     }
 }

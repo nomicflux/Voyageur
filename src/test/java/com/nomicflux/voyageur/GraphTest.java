@@ -1,9 +1,9 @@
 package com.nomicflux.voyageur;
 
+import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import com.nomicflux.voyageur.impl.AdjListGraph;
-import com.nomicflux.voyageur.impl.ValueEdge;
 import com.nomicflux.voyageur.impl.ValueNode;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class GraphTest {
     @Test
     public void sum() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
 
         Integer res = graph.<Integer>simpleFold((acc, c) -> acc + c.getNode().getValue(), 0);
 
@@ -30,7 +30,7 @@ public class GraphTest {
 
     @Test
     public void sumWithCut() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
 
         Integer res = graph.<Integer>simpleCutFold((acc, c) -> acc + c.getNode().getValue(),
                 c -> c.getNode().getValue().equals(6),
@@ -41,9 +41,9 @@ public class GraphTest {
 
     @Test
     public void dfWholeSum() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
 
-        Integer res = graph.<StrictStack<ValueNode<Integer>>, Integer>guidedFold(state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
+        Integer res = graph.<StrictStack<ValueNode<Integer, Unit>>, Integer>guidedFold(state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
                 (acc, c) -> state(s -> tuple(acc + c.getNode().getValue(), foldLeft((a, next) -> a.cons(next.getNodeTo()), s, c.getOutboundEdges()))),
                 strictStack(node(1)),
                 0);
@@ -53,9 +53,9 @@ public class GraphTest {
 
     @Test
     public void bfWholeSum() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
 
-        Integer res = graph.<StrictQueue<ValueNode<Integer>>, Integer>guidedFold(state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
+        Integer res = graph.<StrictQueue<ValueNode<Integer, Unit>>, Integer>guidedFold(state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
                 (acc, c) -> state(s -> tuple(acc + c.getNode().getValue(), foldLeft((a, next) -> a.snoc(next.getNodeTo()), s, c.getOutboundEdges()))),
                 strictQueue(node(1)),
                 0);
@@ -65,9 +65,9 @@ public class GraphTest {
 
     @Test
     public void dfCutSum() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9), asList(9, 10)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9), asList(9, 10)));
 
-        Integer res = graph.<StrictStack<ValueNode<Integer>>, Integer>guidedCutFold(
+        Integer res = graph.<StrictStack<ValueNode<Integer, Unit>>, Integer>guidedCutFold(
                 c -> c.getNode().getValue().equals(8),
                 state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
                 (acc, c) -> state(s -> tuple(acc + c.getNode().getValue(), foldLeft((a, next) -> a.cons(next.getNodeTo()), s, c.getOutboundEdges()))),
@@ -79,9 +79,9 @@ public class GraphTest {
 
     @Test
     public void bfCutSum() {
-        AdjListGraph<Integer, ValueNode<Integer>, ValueEdge<Integer, ValueNode<Integer>>> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9), asList(9, 10)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9), asList(9, 10)));
 
-        Integer res = graph.<StrictQueue<ValueNode<Integer>>, Integer>guidedCutFold(
+        Integer res = graph.<StrictQueue<ValueNode<Integer, Unit>>, Integer>guidedCutFold(
                 c -> c.getNode().getValue().equals(8),
                 state(s -> tuple(nodeOrTerminate(s.head()), s.tail())),
                 (acc, c) -> state(s -> tuple(acc + c.getNode().getValue(), foldLeft((a, next) -> a.snoc(next.getNodeTo()), s, c.getOutboundEdges()))),

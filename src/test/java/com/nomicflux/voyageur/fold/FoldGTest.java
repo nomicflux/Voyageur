@@ -1,22 +1,9 @@
 package com.nomicflux.voyageur.fold;
 
-import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.lambda.functions.Fn1;
-import com.jnape.palatable.shoki.impl.StrictQueue;
-import com.jnape.palatable.shoki.impl.StrictStack;
-import com.nomicflux.voyageur.Node;
-import com.nomicflux.voyageur.impl.AdjListGraph;
-import com.nomicflux.voyageur.impl.ValueEdge;
-import org.junit.Test;
-
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
-import static com.jnape.palatable.lambda.functions.Fn1.fn1;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.nomicflux.voyageur.fold.FoldG.*;
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromEdges;
 import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FoldGTest {

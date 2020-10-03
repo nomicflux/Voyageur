@@ -1,8 +1,7 @@
 package com.nomicflux.voyageur.search;
 
-import com.nomicflux.voyageur.Node;
+import com.jnape.palatable.lambda.adt.Unit;
 import com.nomicflux.voyageur.impl.AdjListGraph;
-import com.nomicflux.voyageur.impl.ValueEdge;
 import org.junit.Test;
 
 import static com.nomicflux.voyageur.impl.AdjListGraph.*;
@@ -16,17 +15,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BFSearchTest {
     @Test
     public void nothingFoundInEmptyGraph() {
-        assertFalse(bfSearch(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>emptyGraph(), node(1), 1));
+        assertFalse(bfSearch(AdjListGraph.<Integer, Unit, Unit>emptyGraph(), node(1), 1));
     }
 
     @Test
     public void singletonItemFoundInSingletonGraph() {
-        assertTrue(bfSearch(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(1), 1));
+        assertTrue(bfSearch(AdjListGraph.<Integer, Unit, Unit>singletonGraph(node(1)), node(1), 1));
     }
 
     @Test
     public void singletonItemNotFoundFromOtherNode() {
-        assertFalse(bfSearch(AdjListGraph.<Integer, Node<Integer>, ValueEdge<Integer, Node<Integer>>>singletonGraph(node(1)), node(2), 1));
+        assertFalse(bfSearch(AdjListGraph.<Integer, Unit, Unit>singletonGraph(node(1)), node(2), 1));
     }
 
     @Test
@@ -41,20 +40,20 @@ public class BFSearchTest {
 
     @Test
     public void followsSeveralSteps() {
-        assertTrue(bfSearch(fromChain(asList(1,2,3,4,5,6,7,8,9,10)),
+        assertTrue(bfSearch(fromChain(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
                 node(1), 10));
     }
 
     @Test
     public void evenWithCycles() {
-        assertTrue(bfSearch(fromChains(asList(asList(1,2,3,5), asList(2,4,1), asList(3,1))),
+        assertTrue(bfSearch(fromChains(asList(asList(1, 2, 3, 5), asList(2, 4, 1), asList(3, 1))),
                 node(1), 5));
     }
 
 
     @Test
     public void neverReachesDisconnections() {
-        assertFalse(bfSearch(fromChains(asList(asList(1,2,3,1), asList(2,4,1), asList(5,5))),
+        assertFalse(bfSearch(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(5, 5))),
                 node(1), 5));
     }
 }
