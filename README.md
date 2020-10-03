@@ -1,5 +1,7 @@
 # Voyageur - Functional Graph Algorithms in Java
 
+[![Voyageur](https://img.shields.io/maven-central/v/io.ataraxic.nomicflux/voyageur.svg)](http://search.maven.org/#search%7Cga%7C1%7Cio.ataraxic.nomicflux.voyageur)
+
 Relies on [Lamba](https://github.com/palatable/lambda/) for functional paradigms and
 [Shoki](https://github.com/palatable/shoki) for immutable data structures.
 
