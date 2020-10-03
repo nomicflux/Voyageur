@@ -54,32 +54,32 @@ The same, but using an explicit breadth-first folding strategy:
 ```java
 AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
 Integer res = graph
-    .<StrictQueue<ValueNode<Integer, Unit>>, Integer>guidedFold(
-        state(q -> tuple(nodeOrTerminate(q.head()),                                   // Terminate the fold if there is nothing left in our queue (i.e. stay only in our starting component)
-                         q.tail())),                                                  // Remove the element from the queue once we use it
-        (acc, c) -> state(q -> tuple(acc + c.getNode().getValue(),                    // Add the current `Context`'s node value to our accumulator
-                                     foldLeft((a, next) -> a.snoc(next.getNodeTo()),  // Add all of the current `Context`s outgoing edges to our queue
-                                              q, 
-                                              c.getOutboundEdges()))),
-        strictQueue(node(1)),                                                         // Use a queue starting at `node(1)` to control how we traverse the graph
-        0);                                                                           // Starting accumulator of 0
+  .<StrictQueue<ValueNode<Integer, Unit>>, Integer>guidedFold(
+      state(q -> tuple(nodeOrTerminate(q.head()),                                   // Terminate the fold if there is nothing left in our queue (i.e. stay only in our starting component)
+                       q.tail())),                                                  // Remove the element from the queue once we use it
+      (acc, c) -> state(q -> tuple(acc + c.getNode().getValue(),                    // Add the current `Context`'s node value to our accumulator
+                                   foldLeft((a, next) -> a.snoc(next.getNodeTo()),  // Add all of the current `Context`s outgoing edges to our queue
+                                            q, 
+                                            c.getOutboundEdges()))),
+      strictQueue(node(1)),                                                         // Use a queue starting at `node(1)` to control how we traverse the graph
+      0);                                                                           // Starting accumulator of 0
 assertEquals(55, res);
 ```
 
 Implementation of a depth-first search, which returns all edges and nodes accessed:
 ```java
 public StrictQueue<Tuple2<Maybe<E>, N>> checkedApply(G startGraph, N startNode, A a) {
-    return startGraph
-               .guidedCutFold(c -> c.getNode().getValue().equals(a),                                 // Stop when we reach a node with value a
-                              state(s -> tuple(nodeOrTerminate(s._2().head().fmap(Tuple2::_2)),      // Grab the next node from a stack; terminate if none available
-                                               tuple(s._2().head().flatMap(Tuple2::_1),              
-                                                     s._2().tail()))),                                
-                              (acc, c) -> state(s -> tuple(acc.snoc(tuple(s._1(), c.getNode())),     // Shift the next node with its edge (if it wasn't the first) into a queue
-                                                           tuple(s._1(), 
-                                                                 foldLeft((s_, next) -> s_.cons(tuple(just(next), next.getNodeTo())),  // Add all the outgoing edges to our stack
-                                                                          s._2(), 
-                                                                          c.getOutboundEdges())))),
-                              tuple(nothing(), strictStack(tuple(nothing(), startNode))),            // Starting stack contains no edge and our starting node
-                              strictQueue())                                                         // Accumulator starts as empty queue
+  return startGraph
+    .guidedCutFold(c -> c.getNode().getValue().equals(a),                                 // Stop when we reach a node with value a
+                   state(s -> tuple(nodeOrTerminate(s._2().head().fmap(Tuple2::_2)),      // Grab the next node from a stack; terminate if none available
+                                    tuple(s._2().head().flatMap(Tuple2::_1),              
+                                          s._2().tail()))),                                
+                   (acc, c) -> state(s -> tuple(acc.snoc(tuple(s._1(), c.getNode())),     // Shift the next node with its edge (if it wasn't the first) into a queue
+                                                tuple(s._1(), 
+                                                      foldLeft((s_, next) -> s_.cons(tuple(just(next), next.getNodeTo())),  // Add all the outgoing edges to our stack
+                                                               s._2(), 
+                                                               c.getOutboundEdges())))),
+                   tuple(nothing(), strictStack(tuple(nothing(), startNode))),            // Starting stack contains no edge and our starting node
+                   strictQueue())                                                         // Accumulator starts as empty queue
 }
 ```
