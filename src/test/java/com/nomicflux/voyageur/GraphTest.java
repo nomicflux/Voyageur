@@ -29,17 +29,6 @@ public class GraphTest {
     }
 
     @Test
-    public void sumWithCut() {
-        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
-
-        Integer res = graph.<Integer>simpleCutFold((acc, c) -> acc + c.getNode().getValue(),
-                c -> c.getNode().getValue().equals(6),
-                0);
-
-        assertEquals(21, res);
-    }
-
-    @Test
     public void dfWholeSum() {
         AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 7, 10), asList(6, 8), asList(6, 9)));
 

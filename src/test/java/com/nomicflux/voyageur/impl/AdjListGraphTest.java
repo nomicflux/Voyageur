@@ -4,7 +4,7 @@ import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.impl.HashSet;
 import com.nomicflux.voyageur.Context;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
@@ -70,7 +70,7 @@ public class AdjListGraphTest {
         ValueEdge<Integer, Unit, Unit> edge = edgeFromTo(node(1), node(2));
         AdjListGraph<Integer, Unit, Unit> graph = fromEdge(edge);
         Tuple2<Context<Integer, ValueNode<Integer, Unit>, ValueEdge<Integer, Unit, Unit>, HashSet<ValueEdge<Integer, Unit, Unit>>>, AdjListGraph<Integer, Unit, Unit>> decomposed = graph.decompose().orElseThrow(AssertionError::new);
-        assertThat(decomposed._1().getOutboundEdges(), equalTo(hashSet(edge)));
+        assertThat(decomposed._1().getInboundEdges().union(decomposed._1().getOutboundEdges()), equalTo(hashSet(edge)));
         assertFalse(decomposed._2().isEmpty());
     }
 

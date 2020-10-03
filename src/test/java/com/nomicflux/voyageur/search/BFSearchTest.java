@@ -2,7 +2,7 @@ package com.nomicflux.voyageur.search;
 
 import com.jnape.palatable.lambda.adt.Unit;
 import com.nomicflux.voyageur.impl.AdjListGraph;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.nomicflux.voyageur.impl.AdjListGraph.*;
 import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;

@@ -8,7 +8,7 @@ import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
 import com.nomicflux.voyageur.impl.ValueNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;

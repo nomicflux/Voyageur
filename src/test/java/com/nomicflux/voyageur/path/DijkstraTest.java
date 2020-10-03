@@ -5,7 +5,7 @@ import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.monoid.Monoid.monoid;

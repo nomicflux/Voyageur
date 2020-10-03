@@ -15,6 +15,7 @@ import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Tupler2.tupler;
 import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.recurse;
 import static com.jnape.palatable.lambda.functions.recursion.RecursiveResult.terminate;
 import static com.jnape.palatable.lambda.functor.builtin.State.state;
@@ -70,7 +71,8 @@ public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends 
                                         gc -> gc.match(g_ -> state(recurse(tuple(g_, acc))),
                                                 c -> accumulator.apply(acc, c._1()).fmap(ac -> destinationCheck.apply(c._1())
                                                         ? terminate(ac)
-                                                        : recurse(tuple(c._2(), ac))))))))
+                                                        : recurse(tuple(c._2(), ac)))
+                                        )))))
                 .eval(defState);
     }
 
@@ -81,8 +83,9 @@ public interface Graph<A, N extends Node<A>, E extends Edge<A, N, E>, I extends 
         return guidedCutFold(constantly(false), contextGetter, accumulator, defState, defAcc);
     }
 
-    default <Acc> Acc simpleCutFold(Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
-                                    Fn1<Context<A, N, E, I>, Boolean> destinationCheck,
+    // Since there is no guidance in how to deconstruct the graph, this method can be non-deterministic
+    default <Acc> Acc simpleCutFold(Fn1<Context<A, N, E, I>, Boolean> destinationCheck,
+                                    Fn2<Acc, Context<A, N, E, I>, Acc> accumulator,
                                     Acc defAcc) {
         return guidedCutFold(destinationCheck,
                 state(FoldContinue.decompose()),
