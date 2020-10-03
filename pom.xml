@@ -6,7 +6,7 @@
 
     <groupId>io.ataraxic.nomicflux</groupId>
     <artifactId>voyageur</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3</version>
 
     <name>Voyageur</name>
     <description>
@@ -94,16 +94,16 @@
         </dependency>
     </dependencies>
 
-    <repositories>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>central</id>
-            <url>https://repo1.maven.org/maven2</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
-    </repositories>
-
+    </distributionManagement>
 
     <profiles>
         <profile>
