@@ -1,9 +1,9 @@
 package testsupport;
 
 import com.jnape.palatable.lambda.adt.Unit;
-import com.nomicflux.voyageur.impl.AdjListGraph;
-import com.nomicflux.voyageur.impl.ValueEdge;
-import com.nomicflux.voyageur.impl.ValueNode;
+import io.ataraxic.nomicflux.voyageur.impl.AdjListGraph;
+import io.ataraxic.nomicflux.voyageur.impl.ValueEdge;
+import io.ataraxic.nomicflux.voyageur.impl.ValueNode;
 import dev.marksman.gauntlet.Arbitrary;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.io.IO.io;
-import static com.nomicflux.voyageur.impl.AdjListGraph.fromChains;
+import static io.ataraxic.nomicflux.voyageur.impl.AdjListGraph.fromChains;
 import static java.util.Arrays.asList;
 
 public final class ArbitraryInstances {
