@@ -14,7 +14,7 @@ import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.path.Dijkstra.dijkstra;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
+import static testsupport.matchers.IterableMatcher.iterates;
 
 public class DijkstraTest {
 
@@ -26,6 +26,6 @@ public class DijkstraTest {
                 weightedEdgeFromTo(node(1), node(2), 1)));
 
         StrictQueue<Tuple2<Integer, ValueNode<Integer, Unit>>> found = dijkstra(monoid(Integer::sum, 0), graph, node(1), 4);
-        assertThat(found, hasItems(tuple(0, node(1)), tuple(1, node(2)), tuple(3, node(3)), tuple(4, node(4))));
+        assertThat(found, iterates(tuple(0, node(1)), tuple(1, node(2)), tuple(3, node(3)), tuple(4, node(4))));
     }
 }

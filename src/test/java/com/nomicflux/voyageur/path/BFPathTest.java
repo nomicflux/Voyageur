@@ -4,7 +4,6 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.impl.StrictQueue;
-import com.nomicflux.voyageur.Node;
 import com.nomicflux.voyageur.impl.AdjListGraph;
 import com.nomicflux.voyageur.impl.ValueEdge;
 import com.nomicflux.voyageur.impl.ValueNode;
@@ -18,10 +17,10 @@ import static com.nomicflux.voyageur.impl.ValueEdge.edgeFromTo;
 import static com.nomicflux.voyageur.impl.ValueNode.node;
 import static com.nomicflux.voyageur.path.BFPath.bfPath;
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static testsupport.matchers.IterableMatcher.iterates;
 
 public class BFPathTest {
     @Test
@@ -74,7 +73,7 @@ public class BFPathTest {
     public void evenWithCycles() {
         StrictQueue<Tuple2<Maybe<ValueEdge<Integer, Unit, Unit>>, ValueNode<Integer, Unit>>> res = bfPath(fromChains(asList(asList(1, 2, 3, 1), asList(2, 4, 1), asList(4, 5))),
                 node(1), 5);
-        assertThat(res, hasItems(tuple(nothing(), node(1)),
+        assertThat(res, iterates(tuple(nothing(), node(1)),
                 tuple(just(edgeFromTo(node(1), node(2))), node(2)),
                 tuple(just(edgeFromTo(node(2), node(3))), node(3)),
                 tuple(just(edgeFromTo(node(2), node(4))), node(4)),

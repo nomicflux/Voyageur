@@ -21,7 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class GraphTest {
     @Test
     public void sum() {
-        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
+        AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10),
+                asList(6, 8),
+                asList(6, 7),
+                asList(5,8),
+                asList(10, 1)));
 
         Integer res = graph.<Integer>simpleFold((acc, c) -> acc + c.getNode().getValue(), 0);
 
