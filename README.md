@@ -42,8 +42,11 @@ box, the following implementation types are available:
 
 Sum all `Integer` `Node`s in a graph, using an arbitrary, implementation-specific order:
 ```java
-AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), asList(6, 8), asList(6, 7)));
-Integer res = graph.<Integer>simpleFold((acc, c) -> acc + c.getNode().getValue(), 0);
+AdjListGraph<Integer, Unit, Unit> graph = fromChains(asList(asList(1, 2, 3, 4, 5, 6, 9, 10), 
+                                                            asList(6, 8), 
+                                                            asList(6, 7)));
+Integer res = graph.<Integer>simpleFold((acc, c) -> acc + c.getNode().getValue(), 
+                                        0);
 assertEquals(55, res);
 ```
 
