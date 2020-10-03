@@ -10,6 +10,12 @@ import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 
+/**
+ * A {@link LabeledNode} which is a value object, isomorphic to its value and label
+ *
+ * @param <A>  The type of the node's ID value
+ * @param <L>  The type of the node's metadata label
+ */
 public final class ValueNode<A, L> implements LabeledNode<A, L> {
     private final A value;
     private final L label;
@@ -19,8 +25,15 @@ public final class ValueNode<A, L> implements LabeledNode<A, L> {
         this.label = label;
     }
 
+    /**
+     * Create a new node with no label
+     *
+     * @param a    The node's ID value
+     * @param <A>  The type of the node's ID value
+     * @return     A node with the value {@code a}
+     */
     public static <A> ValueNode<A, Unit> node(A a) {
-        return new ValueNode<A, Unit>(a, UNIT);
+        return new ValueNode<>(a, UNIT);
     }
 
     public static <A> Fn1<A, ValueNode<A, Unit>> node() {
@@ -28,6 +41,15 @@ public final class ValueNode<A, L> implements LabeledNode<A, L> {
     }
 
 
+    /**
+     * Create a new node with a provided label
+     *
+     * @param a      The node's ID value
+     * @param label  The node's metadata label
+     * @param <A>    The type of the node's ID value
+     * @param <L>    The type of the node's metadata label
+     * @return       A node with the value {@code a} and label {@code label}
+     */
     public static <A, L> ValueNode<A, L> labeledNode(A a, L label) {
         return new ValueNode<>(a, label);
     }
@@ -40,8 +62,17 @@ public final class ValueNode<A, L> implements LabeledNode<A, L> {
         return ValueNode::labeledNode;
     }
 
+    /**
+     * Label an existing node. Will use the existing node's value and discard other information in the node.
+     *
+     * @param node   Node to use for providing an ID value
+     * @param label  The node's metadata label
+     * @param <A>    The type of the node's ID value
+     * @param <L>    The type of the node's metadata label
+     * @return       A node with the value {@code a} and label {@code label}
+     */
     public static <A, L> ValueNode<A, L> labelNode(Node<A> node, L label) {
-        return new ValueNode<A, L>(node.getValue(), label);
+        return new ValueNode<>(node.getValue(), label);
     }
 
     public static <A, L> Fn1<L, ValueNode<A, L>> labelNode(Node<A> node) {
@@ -52,10 +83,17 @@ public final class ValueNode<A, L> implements LabeledNode<A, L> {
         return ValueNode::labelNode;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public A getValue() {
         return value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public L getLabel() {
         return label;
